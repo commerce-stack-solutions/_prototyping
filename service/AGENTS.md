@@ -11,7 +11,7 @@ This directory contains the Gradle root project for all Spring Boot modules.
 ## Gradle Configuration
 
 - The root `build.gradle.kts` defines the Spring Boot and Dependency Management plugin versions.
-- Java 21 toolchain is configured for all projects.
+- Java 25 toolchain is configured for all projects.
 - Shared group and version are defined here.
 
 ## Adding New Modules
