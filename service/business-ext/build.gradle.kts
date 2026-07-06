@@ -5,7 +5,7 @@ plugins {
 }
 
 dependencies {
-    implementation(project(":service:business-core"))
+    implementation(project(":business-core"))
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     runtimeOnly("com.h2database:h2")
