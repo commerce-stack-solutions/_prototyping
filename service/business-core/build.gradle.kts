@@ -4,6 +4,7 @@ plugins {
     id("org.springframework.boot")
     id("io.spring.dependency-management")
     `java-library`
+    id("io.commercestacksolutions.cdf-codegen")
 }
 
 dependencies {
