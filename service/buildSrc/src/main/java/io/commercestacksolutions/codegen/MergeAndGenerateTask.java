@@ -26,35 +26,17 @@ import java.util.Set;
  * Gradle task that reads CDF JSON files, merges definitions for the same entity,
  * and generates Java source files in the configured output directory.
  *
- * <p>Merge order:
- * <ol>
- *   <li>CDF files from <em>dependency modules</em> ({@link #getDependencyCdfDirectories()})
- *       are treated as the <strong>base</strong> definitions.</li>
- *   <li>CDF files from the <em>current module</em> ({@link #getPrimaryCdfDirectory()})
- *       are the <strong>extensions</strong> — they override or extend the base.</li>
- * </ol>
- *
- * <p>Only entities whose CDF files appear in the primary (current-module) directory
- * are written to the output.
+ * <p>CDF files from all provided directories ({@link #getCdfDirectories()})
+ * are loaded and merged. Classes are generated for all discovered entities.
  */
 public abstract class MergeAndGenerateTask extends DefaultTask {
 
     /**
-     * The CDF directory of the current (owning) module.
-     * Only entities found here are generated as output files.
+     * All CDF directories to scan for definitions.
      */
     @InputFiles
     @SkipWhenEmpty
-    public abstract ConfigurableFileCollection getPrimaryCdfDirectory();
-
-    /**
-     * CDF directories from dependency modules.
-     * Used only for merging (base definitions); no output is generated for
-     * entities found only here.
-     */
-    @InputFiles
-    @Optional
-    public abstract ConfigurableFileCollection getDependencyCdfDirectories();
+    public abstract ConfigurableFileCollection getCdfDirectories();
 
     /** Directory where the generated {@code .java} files are written. */
     @OutputDirectory
@@ -66,43 +48,24 @@ public abstract class MergeAndGenerateTask extends DefaultTask {
         CdfMerger merger = new CdfMerger();
         JavaCodeGenerator generator = new JavaCodeGenerator();
 
-        // Step 1: load base definitions from dependency module CDFs (base first)
         Map<String, List<CdfDefinition>> allDefinitions = new LinkedHashMap<>();
-        getDependencyCdfDirectories().forEach(dir -> {
+        Set<String> allEntities = new LinkedHashSet<>();
+
+        getCdfDirectories().forEach(dir -> {
             if (dir.exists() && dir.isDirectory()) {
-                loadCdfDirectory(dir, mapper, allDefinitions);
+                loadCdfDirectory(dir, mapper, allDefinitions, allEntities);
             }
         });
 
-        // Step 2: load primary (current module) CDFs (extensions, applied after base)
-        Set<String> ownedEntities = new LinkedHashSet<>();
-        getPrimaryCdfDirectory().forEach(dir -> {
-            if (dir.exists() && dir.isDirectory()) {
-                loadCdfDirectory(dir, mapper, allDefinitions);
-                // Track entity names defined in the primary module
-                File[] jsonFiles = dir.listFiles((d, name) -> name.endsWith(".json"));
-                if (jsonFiles != null) {
-                    for (File f : jsonFiles) {
-                        try {
-                            CdfDefinition def = mapper.readValue(f, CdfDefinition.class);
-                            ownedEntities.add(def.getEntity());
-                        } catch (IOException e) {
-                            getLogger().warn("Could not re-read CDF to determine owned entities: " + f, e);
-                        }
-                    }
-                }
-            }
-        });
-
-        if (ownedEntities.isEmpty()) {
-            getLogger().lifecycle("No CDF files found in primary directory – skipping generation.");
+        if (allEntities.isEmpty()) {
+            getLogger().lifecycle("No CDF files found – skipping generation.");
             return;
         }
 
         File outputRoot = getOutputDirectory().get().getAsFile();
         int generated = 0;
 
-        for (String entityName : ownedEntities) {
+        for (String entityName : allEntities) {
             List<CdfDefinition> defs = allDefinitions.get(entityName);
             if (defs == null || defs.isEmpty()) continue;
 
@@ -123,13 +86,15 @@ public abstract class MergeAndGenerateTask extends DefaultTask {
     }
 
     private void loadCdfDirectory(File dir, ObjectMapper mapper,
-                                   Map<String, List<CdfDefinition>> target) {
+                                   Map<String, List<CdfDefinition>> target,
+                                   Set<String> entities) {
         File[] jsonFiles = dir.listFiles((d, name) -> name.endsWith(".json"));
         if (jsonFiles == null) return;
         for (File jsonFile : jsonFiles) {
             try {
                 CdfDefinition def = mapper.readValue(jsonFile, CdfDefinition.class);
                 target.computeIfAbsent(def.getEntity(), k -> new ArrayList<>()).add(def);
+                entities.add(def.getEntity());
                 getLogger().debug("Loaded CDF: {} from {}", def.getEntity(), jsonFile);
             } catch (IOException e) {
                 getLogger().error("Failed to parse CDF file: " + jsonFile, e);
@@ -137,4 +102,5 @@ public abstract class MergeAndGenerateTask extends DefaultTask {
             }
         }
     }
+
 }
