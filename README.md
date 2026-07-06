@@ -12,7 +12,7 @@ The project is divided into several modules under the `service/` directory:
 
 ## Technologies Used
 
-- **Java 21**: Leveraging modern Java features.
+- **Java 25**: Leveraging modern Java features.
 - **Spring Boot 4.0.7**: Providing the foundation for the microservices.
 - **Gradle**: Used for build automation and dependency management.
 - **JPA / Hibernate**: For data persistence.
