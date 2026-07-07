@@ -11,7 +11,7 @@ import org.gradle.api.tasks.TaskProvider;
 import java.io.File;
 
 /**
- * Gradle plugin that registers the {@code mergeAndGenerate} task for a module and
+ * Gradle plugin that registers the {@code generateClassesFromCDF} task for a module and
  * wires generated sources into the {@code main} source set.
  *
  * <p>Apply in a module's {@code build.gradle.kts}:
@@ -32,9 +32,9 @@ public class CdfCodeGenerationPlugin implements Plugin<Project> {
 
     @Override
     public void apply(Project project) {
-        // Register the task eagerly so it is always visible (e.g., `./gradlew mergeAndGenerate`)
-        TaskProvider<MergeAndGenerateTask> generateTask =
-                project.getTasks().register("mergeAndGenerate", MergeAndGenerateTask.class, task -> {
+        // Register the task eagerly so it is always visible (e.g., `./gradlew generateClassesFromCDF`)
+        TaskProvider<GenerateClassesFromCDFTask> generateTask =
+                project.getTasks().register("generateClassesFromCDF", GenerateClassesFromCDFTask.class, task -> {
                     task.setDescription("Generates Java source files from CDF JSON definitions.");
                     task.setGroup("build");
 
@@ -63,7 +63,7 @@ public class CdfCodeGenerationPlugin implements Plugin<Project> {
             mainSourceSet.getJava().srcDir(project.getLayout().getBuildDirectory().dir("generated/sources/cdf/java"));
         });
 
-        // Make compileJava depend on mergeAndGenerate so generation always runs first
+        // Make compileJava depend on generateClassesFromCDF so generation always runs first
         project.getTasks().named("compileJava", task -> task.dependsOn(generateTask));
     }
 }

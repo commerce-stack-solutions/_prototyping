@@ -5,13 +5,13 @@ This directory contains the Gradle root project for all Spring Boot modules.
 ## Build and Run
 
 - **Build everything**: `./gradlew build`
-- **Generate sources only**: `./gradlew mergeAndGenerate`
+- **Generate sources only**: `./gradlew generateClassesFromCDF`
 - **Run tests**: `./gradlew test`
 - **Run a specific module**: `./gradlew :<module-name>:bootRun` (e.g., `./gradlew :business-ext:bootRun`)
 
 ## CDF Code Generation
 
-JPA entities are defined as JSON files in `src/main/resources/cdf/` inside each module and generated into `src/generated/main/java/` (git-ignored). The `mergeAndGenerate` task runs automatically before `compileJava`.
+JPA entities are defined as JSON files in `src/main/resources/cdf/` inside each module and generated into `src/generated/main/java/` (git-ignored). The `generateClassesFromCDF` task runs automatically before `compileJava`.
 
 See `buildSrc/` for the Gradle plugin implementation (`io.commercestacksolutions.cdf-codegen`).
 

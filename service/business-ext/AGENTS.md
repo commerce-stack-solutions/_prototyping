@@ -37,6 +37,6 @@ This module depends on `business-core`. It inherits all core entities and functi
 
 To add a new extension:
 1. Create a CDF file in `src/main/resources/cdf/` for new entities, or an extension CDF for existing entities.
-2. Run `./gradlew mergeAndGenerate` to regenerate the Java sources.
+2. Run `./gradlew generateClassesFromCDF` to regenerate the Java sources.
 3. Create a Repository interface for new entities.
 4. Follow the same package structure for consistency (`web`, `dataaccess`, etc.).

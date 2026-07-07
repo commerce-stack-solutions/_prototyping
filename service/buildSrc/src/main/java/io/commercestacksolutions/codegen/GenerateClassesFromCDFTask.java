@@ -29,7 +29,7 @@ import java.util.Set;
  * <p>CDF files from all provided directories ({@link #getCdfDirectories()})
  * are loaded and merged. Classes are generated for all discovered entities.
  */
-public abstract class MergeAndGenerateTask extends DefaultTask {
+public abstract class GenerateClassesFromCDFTask extends DefaultTask {
 
     /**
      * All CDF directories to scan for definitions.
