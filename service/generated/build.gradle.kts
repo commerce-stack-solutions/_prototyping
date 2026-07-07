@@ -12,4 +12,4 @@ dependencies {
 }
 
 // Ensure this module is built before others that depend on it
-// The plugin already wires compileJava to depend on mergeAndGenerate
+// The plugin already wires compileJava to depend on generateClassesFromCDF

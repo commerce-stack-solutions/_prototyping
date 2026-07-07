@@ -20,7 +20,7 @@ JPA entities in this module are **generated** from CDF (Class Definition Format)
 
 To modify an entity:
 1. Edit its CDF file in `src/main/resources/cdf/`.
-2. Run `./gradlew mergeAndGenerate` (or just `./gradlew build`) to regenerate.
+2. Run `./gradlew generateClassesFromCDF` (or just `./gradlew build`) to regenerate.
 
 ## Extension Pattern
 
