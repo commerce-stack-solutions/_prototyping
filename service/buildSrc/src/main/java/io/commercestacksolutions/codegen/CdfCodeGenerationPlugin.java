@@ -30,9 +30,6 @@ public class CdfCodeGenerationPlugin implements Plugin<Project> {
     /** Location of CDF JSON source files within a module. */
     public static final String CDF_SOURCE_DIR = "src/main/resources/cdf";
 
-    /** Root of the generated Java source tree within a module. */
-    public static final String GENERATED_SOURCE_DIR = "src/generated/main/java";
-
     @Override
     public void apply(Project project) {
         // Register the task eagerly so it is always visible (e.g., `./gradlew mergeAndGenerate`)
@@ -43,36 +40,18 @@ public class CdfCodeGenerationPlugin implements Plugin<Project> {
 
                     // Set output directory for generated sources
                     task.getOutputDirectory().set(
-                            project.getLayout().getProjectDirectory().dir(GENERATED_SOURCE_DIR));
-
-                    // Primary CDF directory for this module (current module's CDF files are the extension)
-                    File primaryCdfDir = project.file(CDF_SOURCE_DIR);
-                    task.getPrimaryCdfDirectory().from(primaryCdfDir);
+                            project.getLayout().getBuildDirectory().dir("generated/sources/cdf/java"));
                 });
 
-        // After evaluation, add dependency project CDF dirs as base definitions.
-        // In Gradle 9, ProjectDependency.getDependencyProject() was removed; we resolve
-        // the dependency project by matching on project name across subprojects.
+        // Collect CDF files from all subprojects
         project.afterEvaluate(p -> {
             generateTask.configure(task -> {
-                p.getConfigurations()
-                        .matching(c -> c.getName().equals("implementation") || c.getName().equals("api"))
-                        .forEach(config -> {
-                            config.getDependencies()
-                                    .withType(ProjectDependency.class)
-                                    .forEach(dep -> {
-                                        // Resolve the dependency project via root project subprojects
-                                        String depName = dep.getName();
-                                        p.getRootProject().getSubprojects().forEach(subproject -> {
-                                            if (subproject.getName().equals(depName)) {
-                                                File depCdfDir = subproject.file(CDF_SOURCE_DIR);
-                                                if (depCdfDir.exists()) {
-                                                    task.getDependencyCdfDirectories().from(depCdfDir);
-                                                }
-                                            }
-                                        });
-                                    });
-                        });
+                p.getRootProject().getSubprojects().forEach(subproject -> {
+                    File depCdfDir = subproject.file(CDF_SOURCE_DIR);
+                    if (depCdfDir.exists()) {
+                        task.getCdfDirectories().from(depCdfDir);
+                    }
+                });
             });
         });
 
@@ -81,7 +60,7 @@ public class CdfCodeGenerationPlugin implements Plugin<Project> {
             JavaPluginExtension javaExt = project.getExtensions().getByType(JavaPluginExtension.class);
             SourceSetContainer sourceSets = javaExt.getSourceSets();
             SourceSet mainSourceSet = sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME);
-            mainSourceSet.getJava().srcDir(GENERATED_SOURCE_DIR);
+            mainSourceSet.getJava().srcDir(project.getLayout().getBuildDirectory().dir("generated/sources/cdf/java"));
         });
 
         // Make compileJava depend on mergeAndGenerate so generation always runs first
