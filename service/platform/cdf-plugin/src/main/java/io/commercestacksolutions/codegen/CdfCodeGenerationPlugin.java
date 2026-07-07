@@ -46,7 +46,7 @@ public class CdfCodeGenerationPlugin implements Plugin<Project> {
         // Collect CDF files from all subprojects
         project.afterEvaluate(p -> {
             generateTask.configure(task -> {
-                p.getRootProject().getSubprojects().forEach(subproject -> {
+                p.getRootProject().getAllprojects().forEach(subproject -> {
                     File depCdfDir = subproject.file(CDF_SOURCE_DIR);
                     if (depCdfDir.exists()) {
                         task.getCdfDirectories().from(depCdfDir);
