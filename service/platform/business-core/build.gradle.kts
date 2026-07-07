@@ -6,6 +6,10 @@ plugins {
     `java-library`
 }
 
+springBoot {
+    mainClass.set("io.commercestacksolutions.priceproviderservice.BusinessCoreApplication")
+}
+
 dependencies {
     api(project(":commons"))
     api(project(":generated"))

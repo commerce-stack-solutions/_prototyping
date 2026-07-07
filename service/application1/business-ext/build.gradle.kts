@@ -4,6 +4,10 @@ plugins {
     java
 }
 
+springBoot {
+    mainClass.set("io.commercestacksolutions.priceproviderservice.BusinessExtApplication")
+}
+
 dependencies {
     implementation(project(":business-core"))
     implementation(project(":generated"))
